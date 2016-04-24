@@ -10,44 +10,8 @@
 #include <chrono>
 #include <glog/logging.h>
 
-#include <iostream>
-
-// Shader macro
-#define GLSL(src) "#version 150 core\n" #src
-using namespace gl;
-
-// Vertex shader
-const GLchar *vertexShaderSrc =
-    GLSL(in vec2 position; in vec2 velocity; in vec2 originalPos;
-
-         out vec2 outPosition; out vec2 outVelocity;
-
-         uniform float time; uniform vec2 mousePos;
-
-         void main() {
-           // Points move towards their original position...
-           vec2 newVelocity = originalPos - position;
-
-           // ... unless the mouse is nearby. In that case, they move towards
-           // the mouse.
-           if (length(mousePos - originalPos) < 0.75f) {
-             vec2 acceleration = 1.5f * normalize(mousePos - position);
-             newVelocity = velocity + acceleration * time;
-           }
-
-           if (length(newVelocity) > 1.0f)
-             newVelocity = normalize(newVelocity);
-
-           vec2 newPosition = position + newVelocity * time;
-           outPosition = newPosition;
-           outVelocity = newVelocity;
-           gl_Position = vec4(newPosition, 0.0, 1.0);
-         });
-
-// Fragment shader
-const GLchar *fragmentShaderSrc = GLSL(
-    out vec4 outColor; void main() { outColor = vec4(0.0, 0.0, 1.0, 1.0); });
-
+#include "shader.hpp"
+#include "simple_file.hpp"
 
 GLFWwindow *g_window;
 
@@ -66,6 +30,8 @@ int main(int argc, char **argv) {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
   g_window = glfwCreateWindow(640, 480, "glfw_app", nullptr, nullptr);
+
+  
 
   // Compile shaders
   GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
