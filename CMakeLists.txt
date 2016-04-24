@@ -32,6 +32,8 @@ set(libs
 )
 
 set(sources
+    simple_file.cpp
+    shader.cpp
     main.cpp
 )
 
