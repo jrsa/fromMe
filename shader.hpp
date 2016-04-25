@@ -12,6 +12,8 @@ public:
   shader(const gl::GLchar *vs_src, const gl::GLchar *fs_src);
   shader(const gl:: GLchar *vs_src, const gl::GLchar *gs_src, const gl::GLchar *fs_src);
 
+  ~shader();
+
     // gross hack
     gl::GLuint program() { return _program; }
     void use();

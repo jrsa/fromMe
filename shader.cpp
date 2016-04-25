@@ -96,6 +96,11 @@ shader::shader(const GLchar *vs_src, const GLchar *fs_src) {
 
 }
 
+shader::~shader() {
+  LOG(INFO) << "shader deleted";
+  glDeleteProgram(_program);
+}
+
 void shader::use() {
   glUseProgram(_program);
 }
