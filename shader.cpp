@@ -77,7 +77,7 @@ shader::shader(const GLchar *vs_src, const GLchar *fs_src) {
     GLint arraySize = 0;
     GLenum type = GL_FLOAT;
     GLsizei actualLength = 0;
-    glGetActiveAttrib(_program, ufrm, ufrm_nameData.size(), &actualLength, &arraySize, &type, &ufrm_nameData[0]);
+    glGetActiveUniform(_program, ufrm, ufrm_nameData.size(), &actualLength, &arraySize, &type, &ufrm_nameData[0]);
     
     LOG(INFO) << std::string((char *)&ufrm_nameData[0], actualLength);
   }
