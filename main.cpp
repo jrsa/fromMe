@@ -13,6 +13,9 @@
 #include "shader.hpp"
 #include "simple_file.hpp"
 
+using namespace gl;
+using namespace std::chrono;
+
 GLFWwindow *g_window;
 
 int main(int argc, char **argv) {
@@ -31,30 +34,15 @@ int main(int argc, char **argv) {
 
   g_window = glfwCreateWindow(640, 480, "glfw_app", nullptr, nullptr);
 
-  
+    std::string vs_src(simple_file::read("/Users/jrsa/code/gl/xformFb/physExample.vs.glsl"));
+    std::string fs_src(simple_file::read("/Users/jrsa/code/gl/xformFb/physExample.fs.glsl"));
+    shader s(vs_src.c_str(), fs_src.c_str());
 
-  // Compile shaders
-  GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertexShader, 1, &vertexShaderSrc, nullptr);
-  glCompileShader(vertexShader);
+    const GLchar *feedbackVaryings[] = { "outPosition", "outVelocity" };
+  glTransformFeedbackVaryings(s.program(), 2, feedbackVaryings, GL_INTERLEAVED_ATTRIBS);
 
-  GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragmentShader, 1, &fragmentShaderSrc, nullptr);
-  glCompileShader(fragmentShader);
-
-  // Create program and specify transform feedback variables
-  GLuint program = glCreateProgram();
-  glAttachShader(program, vertexShader);
-  glAttachShader(program, fragmentShader);
-
-  const GLchar *feedbackVaryings[] = {"outPosition", "outVelocity"};
-  glTransformFeedbackVaryings(program, 2, feedbackVaryings, GL_INTERLEAVED_ATTRIBS);
-
-  glLinkProgram(program);
-  glUseProgram(program);
-
-  GLint uniTime = glGetUniformLocation(program, "time");
-  GLint uniMousePos = glGetUniformLocation(program, "mousePos");
+  GLint uniTime = glGetUniformLocation(s.program(), "time");
+  GLint uniMousePos = glGetUniformLocation(s.program(), "mousePos");
 
   GLuint vao;
   glGenVertexArrays(1, &vao);
@@ -76,15 +64,15 @@ int main(int argc, char **argv) {
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
   glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STREAM_DRAW);
 
-  GLint posAttrib = glGetAttribLocation(program, "position");
+  GLint posAttrib = glGetAttribLocation(s.program(), "position");
   glEnableVertexAttribArray(posAttrib);
   glVertexAttribPointer(posAttrib, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
 
-  GLint velAttrib = glGetAttribLocation(program, "velocity");
+  GLint velAttrib = glGetAttribLocation(s.program(), "velocity");
   glEnableVertexAttribArray(velAttrib);
   glVertexAttribPointer(velAttrib, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void *)(2 * sizeof(GLfloat)));
 
-  GLint origPosAttrib = glGetAttribLocation(program, "originalPos");
+  GLint origPosAttrib = glGetAttribLocation(s.program(), "originalPos");
   glEnableVertexAttribArray(origPosAttrib);
   glVertexAttribPointer(origPosAttrib, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void *)(4 * sizeof(GLfloat)));
 
@@ -100,39 +88,34 @@ int main(int argc, char **argv) {
 
   glPointSize(5.0);
 
-  auto t_prev = std::chrono::high_resolution_clock::now();
+  auto t_prev = high_resolution_clock::now();
 
   glfwMakeContextCurrent(g_window);
+  
+  s.use();
 
   while (!glfwWindowShouldClose(g_window)) {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // Calculate delta time
-    auto t_now = std::chrono::high_resolution_clock::now();
-    float time = std::chrono::duration_cast<std::chrono::duration<float>>(t_now - t_prev).count();
+    auto t_now = high_resolution_clock::now();
+    float time = duration_cast<duration<float>>(t_now - t_prev).count();
     t_prev = t_now;
     glUniform1f(uniTime, time);
 
-    // Update mouse position
     double mouseX, mouseY; int h, w = 0;
     glfwGetCursorPos(g_window, &mouseX, &mouseY);
     glfwGetWindowSize(g_window, &w, &h);
     
     glUniform2f(uniMousePos, mouseX / w, mouseY/ h);
 
-    // Perform feedback transform and draw vertices
     glBeginTransformFeedback(GL_POINTS);
       glDrawArrays(GL_POINTS, 0, 100);
     glEndTransformFeedback();
 
     glfwSwapBuffers(g_window);
 
-    
-    
-    // Update vertices' position and velocity using transform feedback
-    glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, sizeof(feedback),
-                       feedback);
+    glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, sizeof(feedback), feedback);
 
     for (int i = 0; i < 100; i++) {
       data[6 * i] = feedback[4 * i];
@@ -141,17 +124,10 @@ int main(int argc, char **argv) {
       data[6 * i + 3] = feedback[4 * i + 3];
     }
 
-    // glBufferData() would reallocate the whole vertex data buffer, which is
-    // unnecessary here.
-    // glBufferSubData() is used instead - it updates an existing buffer.
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(data), data);
 
     glfwPollEvents();
   }
-
-  glDeleteProgram(program);
-  glDeleteShader(fragmentShader);
-  glDeleteShader(vertexShader);
 
   glDeleteBuffers(1, &tbo);
   glDeleteBuffers(1, &vbo);
