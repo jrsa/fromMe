@@ -53,6 +53,11 @@ shader::shader(const GLchar *vs_src, const GLchar *fs_src) {
   _program = glCreateProgram();
   glAttachShader(_program, vertexShader);
   glAttachShader(_program, fragmentShader);
+
+  // daddy the dox sed to put it before glLinkProgram()
+  const GLchar *feedbackVaryings[] = { "outPosition", "outVelocity" };
+  glTransformFeedbackVaryings(_program, 2, feedbackVaryings, GL_INTERLEAVED_ATTRIBS);
+
   glLinkProgram(_program);
   link_info(_program);
   

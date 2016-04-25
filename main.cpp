@@ -34,12 +34,9 @@ int main(int argc, char **argv) {
 
   g_window = glfwCreateWindow(640, 480, "glfw_app", nullptr, nullptr);
 
-    std::string vs_src(simple_file::read("/Users/jrsa/code/gl/xformFb/physExample.vs.glsl"));
-    std::string fs_src(simple_file::read("/Users/jrsa/code/gl/xformFb/physExample.fs.glsl"));
-    shader s(vs_src.c_str(), fs_src.c_str());
-
-    const GLchar *feedbackVaryings[] = { "outPosition", "outVelocity" };
-  glTransformFeedbackVaryings(s.program(), 2, feedbackVaryings, GL_INTERLEAVED_ATTRIBS);
+  std::string vs_src(simple_file::read("/Users/jrsa/code/gl/xformFb/physExample.vs.glsl"));
+  std::string fs_src(simple_file::read("/Users/jrsa/code/gl/xformFb/physExample.fs.glsl"));
+  shader s(vs_src.c_str(), fs_src.c_str());
 
   GLint uniTime = glGetUniformLocation(s.program(), "time");
   GLint uniMousePos = glGetUniformLocation(s.program(), "mousePos");
