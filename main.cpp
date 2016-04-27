@@ -15,8 +15,20 @@
 
 using namespace gl;
 using namespace std::chrono;
+using namespace glm;
 
 GLFWwindow *g_window;
+
+struct vert {
+    vec2 position;
+    vec2 velocity;
+    vec2 originalPos;
+};
+
+struct fbVert {
+    vec2 outPosition;
+    vec2 outVelocity;
+};
 
 int main(int argc, char **argv) {
   glbinding::Binding::initialize(false);
@@ -33,6 +45,8 @@ int main(int argc, char **argv) {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
   g_window = glfwCreateWindow(640, 480, "glfw_app", nullptr, nullptr);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glEnable(GL_BLEND);
 
   std::string vs_src(simple_file::read("/Users/jrsa/code/gl/xformFb/physExample.vs.glsl"));
   std::string fs_src(simple_file::read("/Users/jrsa/code/gl/xformFb/physExample.fs.glsl"));
@@ -45,7 +59,11 @@ int main(int argc, char **argv) {
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
 
+  int field_width(10);
+  int field_area = field_width * field_width;
+
   GLfloat data[600] = {};
+  vert *point_data = new vert[field_width * field_width];
 
   for (int y = 0; y < 10; y++) {
     for (int x = 0; x < 10; x++) {
@@ -56,10 +74,17 @@ int main(int argc, char **argv) {
     }
   }
 
+  for (int y = 0; y < field_width; y++) {
+    for (int x = 0; x < field_width; x++) {
+      vec2 position = { 0.2f * x - 0.9f, 0.2f * y - 0.9f };
+      point_data[10 * y + x] = { position, { 0.0, 0.0 }, position };
+    }
+  }
+
   GLuint vbo;
   glGenBuffers(1, &vbo);
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STREAM_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(data), point_data, GL_STREAM_DRAW);
 
   GLint posAttrib = glGetAttribLocation(s.program(), "position");
   glEnableVertexAttribArray(posAttrib);
@@ -92,8 +117,8 @@ int main(int argc, char **argv) {
   s.use();
 
   while (!glfwWindowShouldClose(g_window)) {
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(0.0f, 0.0f, 0.0f, 0.1f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     auto t_now = high_resolution_clock::now();
     float time = duration_cast<duration<float>>(t_now - t_prev).count();
@@ -103,11 +128,14 @@ int main(int argc, char **argv) {
     double mouseX, mouseY; int h, w = 0;
     glfwGetCursorPos(g_window, &mouseX, &mouseY);
     glfwGetWindowSize(g_window, &w, &h);
-    
-    glUniform2f(uniMousePos, mouseX / w, mouseY/ h);
+
+    float mousePosX = mouseX / w;
+    float mousePosY = mouseY / h;
+
+    glUniform2f(uniMousePos, mousePosX, mousePosY);
 
     glBeginTransformFeedback(GL_POINTS);
-      glDrawArrays(GL_POINTS, 0, 100);
+      glDrawArrays(GL_POINTS, 0, field_width * field_width);
     glEndTransformFeedback();
 
     glfwSwapBuffers(g_window);
@@ -115,6 +143,12 @@ int main(int argc, char **argv) {
     glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, sizeof(feedback), feedback);
 
     for (int i = 0; i < 100; i++) {
+      data[6 * i] = feedback[4 * i];
+      data[6 * i + 1] = feedback[4 * i + 1];
+      data[6 * i + 2] = feedback[4 * i + 2];
+      data[6 * i + 3] = feedback[4 * i + 3];
+    }
+    for (int i = 0; i < field_area; i++) {
       data[6 * i] = feedback[4 * i];
       data[6 * i + 1] = feedback[4 * i + 1];
       data[6 * i + 2] = feedback[4 * i + 2];
