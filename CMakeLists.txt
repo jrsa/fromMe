@@ -10,6 +10,9 @@ find_package(OpenGL REQUIRED)
 find_package(GLFW3 REQUIRED)
 find_package(glbinding REQUIRED)
 
+set(OPENNI_INCLUDE_DIR "/usr/local/include/ni")
+set(OPENNI_LIBRARY "/usr/local/lib/libOpenNI.dylib")
+
 set(GLM_INCLUDE_DIR "/usr/local/include/glm")
 set(GLOG_LIBRARY "/usr/local/opt/glog/lib/libglog.dylib")
 
@@ -18,10 +21,9 @@ include_directories(
     ${GLFW3_INCLUDE_DIR}
     ${GLBINDING_INCLUDE_DIR}
     ${GLM_INCLUDE_DIR}
-)
-
-include_directories(
-    ${CMAKE_CURRENT_SOURCE_DIR}
+        ${OPENNI_INCLUDE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        "rtaudio"
 )
 
 set(libs
@@ -29,13 +31,14 @@ set(libs
     ${GLFW3_LIBRARY}
     ${GLBINDING_LIBRARY}
     ${GLOG_LIBRARY}
+        ${OPENNI_LIBRARY}
 )
 
 set(sources
     simple_file.cpp
     shader.cpp
     main.cpp
-)
+        kinect.cpp kinect.h)
 
 add_executable(${target} ${sources})
 target_link_libraries(${target} ${libs})
