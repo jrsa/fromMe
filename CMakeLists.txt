@@ -38,7 +38,7 @@ set(sources
     simple_file.cpp
     shader.cpp
     main.cpp
-        kinect.cpp kinect.h)
+        kinect.cpp kinect.h billboard.cpp billboard.h)
 
 add_executable(${target} ${sources})
 target_link_libraries(${target} ${libs})
