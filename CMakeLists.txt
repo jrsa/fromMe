@@ -10,6 +10,10 @@ find_package(OpenGL REQUIRED)
 find_package(GLFW3 REQUIRED)
 find_package(glbinding REQUIRED)
 
+find_library(COREAUDIO_LIB CoreAudio)
+find_library(COREFOUNDATION_LIB CoreFoundation)
+add_definitions(-D__MACOSX_CORE__)
+
 set(OPENNI_INCLUDE_DIR "/usr/local/include/ni")
 set(OPENNI_LIBRARY "/usr/local/lib/libOpenNI.dylib")
 
@@ -31,14 +35,18 @@ set(libs
     ${GLFW3_LIBRARY}
     ${GLBINDING_LIBRARY}
     ${GLOG_LIBRARY}
-        ${OPENNI_LIBRARY}
-)
+    ${OPENNI_LIBRARY}
+    ${COREAUDIO_LIB}
+    ${COREFOUNDATION_LIB}
+    )
 
 set(sources
     simple_file.cpp
     shader.cpp
     main.cpp
-        kinect.cpp kinect.h billboard.cpp billboard.h)
+    kinect.cpp
+
+    rtaudio/RtAudio.cpp vertex_format.h)
 
 add_executable(${target} ${sources})
 target_link_libraries(${target} ${libs})

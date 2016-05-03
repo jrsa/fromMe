@@ -37,6 +37,8 @@ void link_info(const GLuint program) {
   }
 }
 
+shader::shader(): _program(0) { }
+
 shader::shader(const GLchar *vs_src, const GLchar *fs_src) {
     // Compile shaders
   GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);

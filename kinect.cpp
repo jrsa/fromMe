@@ -1,20 +1,26 @@
-//
-// Created by James Anderson on 4/27/16.
-//
-
 #include <glog/logging.h>
 #include "kinect.h"
 
 kinect::kinect():_max_depth(0), _buffer_size(0) {
+}
+
+kinect::~kinect() {
+    if(_depth_generator) _depth_generator.Release();
+    _ctx.Release();
+
+    LOG(INFO) << "kinect::~kinect()";
+}
+
+void kinect::setup() {
     xn::EnumerationErrors errors;
     XnStatus status = XN_STATUS_OK;
     status = _ctx.Init();
 
     if (status != XN_STATUS_OK) {
-        for(xn::EnumerationErrors::Iterator it = errors.Begin(); it != errors.End(); ++it) {
+        for (xn::EnumerationErrors::Iterator it = errors.Begin(); it != errors.End(); ++it) {
             XnChar desc[512];
-            xnProductionNodeDescriptionToString(&it.Description(), desc,512);
-            LOG(FATAL) << desc << " failed to to enumerate: " << xnGetStatusString(it.Error());
+            xnProductionNodeDescriptionToString(&it.Description(), desc, 512);
+            LOG(ERROR) << desc << " failed to to enumerate: " << xnGetStatusString(it.Error());
         }
     }
     xnPrintRegisteredLicenses();
@@ -24,42 +30,34 @@ kinect::kinect():_max_depth(0), _buffer_size(0) {
         status = _depth_generator.Create(_ctx);
     }
     if (status != XN_STATUS_OK) {
-        LOG(FATAL) << "couldnt get a depth generator";
+        LOG(ERROR) << "couldnt get a depth generator";
+        throw 20;
+    } else {
+        XnMapOutputMode map_mode;
+        map_mode.nXRes = XN_VGA_X_RES;
+        map_mode.nYRes = XN_VGA_Y_RES;
+        map_mode.nFPS = 30;
+
+        _buffer_size = map_mode.nXRes * map_mode.nYRes;
+
+        status = _depth_generator.SetMapOutputMode(map_mode);
+        _max_depth = _depth_generator.GetDeviceMaxDepth();
+        _depth_generator.StartGenerating();
     }
-    LOG(INFO) << "kinect::kinect()";
 
-    XnMapOutputMode map_mode;
-    map_mode.nXRes = XN_VGA_X_RES;
-    map_mode.nYRes = XN_VGA_Y_RES;
-    map_mode.nFPS = 30;
 
-    _buffer_size = map_mode.nXRes * map_mode.nYRes;
-
-    status = _depth_generator.SetMapOutputMode(map_mode);
-    _max_depth = _depth_generator.GetDeviceMaxDepth();
-
-//    depth_texture.allocate(map_mode.nXRes, map_mode.nYRes, GL_RGB);
-//    depth_pixels = new unsigned char[map_mode.nXRes * map_mode.nYRes * 3];
-//    gray_pixels = new unsigned char[map_mode.nXRes * map_mode.nYRes];
-//    memset(depth_pixels, 0, map_mode.nXRes * map_mode.nYRes * 4 * sizeof(unsigned char));
-
-    _depth_generator.StartGenerating();
 }
 
-kinect::~kinect() {
-    _depth_generator.Release();
-    _ctx.Release();
+const XnDepthPixel* kinect::get_depthmap_pointer() {
 
-    LOG(INFO) << "kinect::~kinect()";
-}
+    XnStatus status = _depth_generator.WaitAndUpdateData();
 
-void kinect::copy_depths(void *dest) {
+    if(status != XN_STATUS_OK) {
+        throw 69;
+    }
+
     xn::DepthMetaData dmd;
     _depth_generator.GetMetaData(dmd);
-    const XnDepthPixel* depth = _depth_generator.GetDepthMap();
-    if(!dest) return;
-
-    int xr = dmd.XRes(), yr = dmd.YRes();
-
-    memccpy(dest, depth, xr * yr, sizeof(uint16_t));
+    const XnDepthPixel *_map = dmd.Data();
+    return _map;
 }

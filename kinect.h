@@ -14,13 +14,17 @@
 class kinect {
 private:
     xn::DepthGenerator _depth_generator;
+    xn::UserGenerator _ugen;
     xn::Context _ctx;
     int _max_depth, _buffer_size;
+
 public:
     kinect();
     ~kinect();
 
-    void copy_depths(void*);
+    void setup();
+
+    const XnDepthPixel* get_depthmap_pointer();
 
     int get_max_depth() const {
         return _max_depth;
