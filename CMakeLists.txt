@@ -10,10 +10,6 @@ find_package(OpenGL REQUIRED)
 find_package(GLFW3 REQUIRED)
 find_package(glbinding REQUIRED)
 
-#find_library(COREAUDIO_LIB CoreAudio)
-#find_library(COREFOUNDATION_LIB CoreFoundation)
-#add_definitions(-D__MACOSX_CORE__)
-
 set(OPENNI_INCLUDE_DIR "/usr/local/include/ni")
 set(OPENNI_LIBRARY "/usr/local/lib/libOpenNI.dylib")
 
@@ -27,7 +23,6 @@ include_directories(
     ${GLM_INCLUDE_DIR}
         ${OPENNI_INCLUDE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}
-#        "rtaudio"
 )
 
 set(libs
@@ -36,8 +31,6 @@ set(libs
     ${GLBINDING_LIBRARY}
     ${GLOG_LIBRARY}
     ${OPENNI_LIBRARY}
-#    ${COREAUDIO_LIB}
-#    ${COREFOUNDATION_LIB}
     )
 
 set(sources
@@ -45,9 +38,7 @@ set(sources
     shader.cpp
     main.cpp
     kinect.cpp
-
-#    rtaudio/RtAudio.cpp
-        vertex_format.h)
+    )
 
 add_executable(${target} ${sources})
 target_link_libraries(${target} ${libs})
