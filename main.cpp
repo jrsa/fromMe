@@ -15,18 +15,22 @@
 #include "simple_file.hpp"
 #include "vertex_format.h"
 
+#define VS_FN "/Users/jrsa/code/gl/xformFb/1.vs.glsl"
+#define FS_FN "/Users/jrsa/code/gl/xformFb/1.fs.glsl"
+
 using namespace gl;
 using namespace std::chrono;
 using namespace simple_file;
 
+
+std::string f_fn, v_fn;
 GLFWwindow *g_window; shader *s; kinect k; bool seed = false;
 
 void keycb(GLFWwindow* window, int key, int , int , int ) {
   switch(key) {
     case 'R': {
       LOG(INFO) << "reloading shader";
-      s = new shader(read("/Users/jrsa/code/gl/xformFb/physExample.vs.glsl").c_str()
-                   , read("/Users/jrsa/code/gl/xformFb/physExample.fs.glsl").c_str());
+      s = new shader(read(v_fn).c_str(), read(f_fn).c_str());
       break;
     }
     case 'P': {
@@ -42,6 +46,9 @@ int main(int argc, char **argv) {
 
   RtAudio audio;
   int c = audio.getDeviceCount();
+
+  f_fn = std::string(FS_FN);
+  v_fn = std::string(VS_FN);
 
   bool kinect_isgood = false;
   uint16_t *depths = nullptr;
@@ -76,8 +83,7 @@ int main(int argc, char **argv) {
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glEnable(GL_BLEND);
 
-  s = new shader(read("/Users/jrsa/code/gl/xformFb/1.vs.glsl").c_str()
-               , read("/Users/jrsa/code/gl/xformFb/1.fs.glsl").c_str());
+  s = new shader(read(v_fn).c_str(), read(f_fn).c_str());
 
   GLint u_time = glGetUniformLocation(s->program(), "time");
   GLint u_mouse_pos = glGetUniformLocation(s->program(), "mousePos");

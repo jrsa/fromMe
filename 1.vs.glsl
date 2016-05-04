@@ -15,7 +15,7 @@ void main() {
     vec2 newVelocity = originalPos - position;
     vec2 tc = -originalPos;
 
-    tc *= mat2(1/2., 0., 0., 1/2.);
+    tc *= mat2(0.5, 0.0, 0.0, 0.5);
     tc += vec2(0.5); 
 
     uvec4 depth_pixel = texture(depth, tc);
