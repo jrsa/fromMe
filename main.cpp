@@ -76,8 +76,8 @@ int main(int argc, char **argv) {
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glEnable(GL_BLEND);
 
-  s = new shader(read("/Users/jrsa/code/gl/xformFb/physExample.vs.glsl").c_str()
-               , read("/Users/jrsa/code/gl/xformFb/physExample.fs.glsl").c_str());
+  s = new shader(read("/Users/jrsa/code/gl/xformFb/1.vs.glsl").c_str()
+               , read("/Users/jrsa/code/gl/xformFb/1.fs.glsl").c_str());
 
   GLint u_time = glGetUniformLocation(s->program(), "time");
   GLint u_mouse_pos = glGetUniformLocation(s->program(), "mousePos");
