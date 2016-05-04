@@ -7,8 +7,8 @@
 #include <chrono>
 #include <glog/logging.h>
 
-#include <RtAudio.h>
-#include <fftw3.h>
+//#include <RtAudio.h>
+//#include <fftw3.h>
 
 #include "kinect.h"
 #include "shader.hpp"
@@ -44,8 +44,8 @@ void keycb(GLFWwindow* window, int key, int , int , int ) {
 
 int main(int argc, char **argv) {
 
-  RtAudio audio;
-  int c = audio.getDeviceCount();
+//  RtAudio audio;
+//  int c = audio.getDeviceCount();
 
   f_fn = std::string(FS_FN);
   v_fn = std::string(VS_FN);
