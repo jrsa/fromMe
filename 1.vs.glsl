@@ -25,9 +25,9 @@ void main() {
     //    vec2 acceleration = 1.5f * normalize(mousePos - position);
     //    newVelocity = velocity + acceleration * time;
     //}
-    if (d > 0.75) {
-        vec2 acceleration = d * normalize(originalPos - position );
-        newVelocity = velocity + d/2. * time;
+    if (d < 0.5) {
+        vec2 acceleration = 2.0 * normalize(position);
+        newVelocity = velocity + acceleration * time;
     }
 
     if (length(newVelocity) > 1.0f) {
