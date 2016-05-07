@@ -1,4 +1,5 @@
 #include <glbinding/Binding.h>
+#include <glbinding/callbacks.h>
 #include <glbinding/gl/gl.h>
 
 #define GLFW_INCLUDE_NONE
@@ -12,8 +13,8 @@
 #include "simple_file.hpp"
 #include "vertex_format.h"
 
-#define VS_FN "/Users/jrsa/code/gl/xformFb/1.vs.glsl"
-#define FS_FN "/Users/jrsa/code/gl/xformFb/1.fs.glsl"
+#define VS_FN "1.vs.glsl"
+#define FS_FN "1.fs.glsl"
 
 using namespace gl;
 using namespace std::chrono;
@@ -60,6 +61,13 @@ int main(int argc, char **argv) {
   }
 
   glbinding::Binding::initialize(false);
+
+  glbinding::setCallbackMaskExcept(glbinding::CallbackMask::After, { "glGetError" });
+  glbinding::setAfterCallback([](const glbinding::FunctionCall &call) {
+      const auto error = glGetError();
+      if (error != GL_NO_ERROR)
+        LOG(ERROR) << "error in " << call.function->name() << ": " << std::hex << error << std::endl;
+  });
 
   if (!glfwInit()) {
     LOG(FATAL) << "failed to initialize glfw";
@@ -137,7 +145,7 @@ int main(int argc, char **argv) {
   fb_vert *feedback_buffer = new fb_vert[field_area];
   glBindBuffer(GL_ARRAY_BUFFER, xform_in_buf);
 
-  glPointSize(3.0);
+  glPointSize(2.0);
 
   glfwSetKeyCallback(g_window, keycb);
 
