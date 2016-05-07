@@ -19,14 +19,14 @@ void main() {
     tc += vec2(0.5); 
 
     uvec4 depth_pixel = texture(depth, tc);
-    float d = normalize(depth_pixel.r);
+    float d = float(depth_pixel.r) / 32768;
 
     //if (length(mousePos - originalPos) < 0.75f) {
     //    vec2 acceleration = 1.5f * normalize(mousePos - position);
     //    newVelocity = velocity + acceleration * time;
     //}
-    if (d < 0.5) {
-        vec2 acceleration = 2.0 * normalize(position);
+    if (d > 0.05f && d < 0.4f) {
+        vec2 acceleration = 2.0f * normalize(position);
         newVelocity = velocity + acceleration * time;
     }
 
