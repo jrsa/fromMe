@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
   glGenVertexArrays(1, &fb_vao);
   glBindVertexArray(fb_vao);
 
-  int field_width(800);
+  int field_width(1000);
   int field_area = field_width * field_width;
 
   vert *orig_points = new vert[field_area];
