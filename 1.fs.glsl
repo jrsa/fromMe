@@ -10,9 +10,9 @@ vec3 hsv2rgb(vec3 c) {
 
 void main() {
 
-    float hue = length(outVelocity) * 0.2 + 0.6;
+    float hue = length(outVelocity) * 0.2 + 0.55;
     vec3 hsv = hsv2rgb( vec3(hue, 1.0, 1.0) );
 
-    //outColor = vec4(hsv, length(outVelocity)-0.1);
-    outColor = vec4(hsv, 1.0);
+    outColor = vec4(hsv, length(outVelocity));
+//    outColor = vec4(hsv, 1.0);
 }
