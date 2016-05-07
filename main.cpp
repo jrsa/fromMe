@@ -165,7 +165,7 @@ int main(int argc, char **argv) {
     glUniform2f(u_mouse_pos, mousePosX, mousePosY);
 
     if (kinect_isgood) {
-      glTexImage2D(GL_TEXTURE_2D, 0, (GLint) GL_RED, 640, 480, 0, GL_RED, GL_UNSIGNED_SHORT, k.get_depthmap_pointer());
+      glTexImage2D(GL_TEXTURE_2D, 0, (GLint) GL_R16UI, 640, 480, 0, GL_RED_INTEGER, GL_UNSIGNED_SHORT, k.get_depthmap_pointer());
     }
 
     glUniform1i(u_depth, 0);
