@@ -60,14 +60,7 @@ int main(int argc, char **argv) {
     LOG(ERROR) << "running with no kinect";
   }
 
-  glbinding::Binding::initialize(false);
 
-  glbinding::setCallbackMaskExcept(glbinding::CallbackMask::After, { "glGetError" });
-  glbinding::setAfterCallback([](const glbinding::FunctionCall &call) {
-      const auto error = glGetError();
-      if (error != GL_NO_ERROR)
-        LOG(ERROR) << "error in " << call.function->name() << ": " << std::hex << error << std::endl;
-  });
 
   if (!glfwInit()) {
     LOG(FATAL) << "failed to initialize glfw";
@@ -81,7 +74,16 @@ int main(int argc, char **argv) {
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
   g_window = glfwCreateWindow(640, 480, argv[0], nullptr, nullptr);
+  glfwMakeContextCurrent(g_window);
 
+  glbinding::Binding::initialize(false);
+
+  glbinding::setCallbackMaskExcept(glbinding::CallbackMask::After, { "glGetError" });
+  glbinding::setAfterCallback([](const glbinding::FunctionCall &call) {
+      const auto error = glGetError();
+      if (error != GL_NO_ERROR)
+        LOG(ERROR) << "error in " << call.function->name() << ": " << std::hex << error << std::endl;
+  });
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glEnable(GL_BLEND);
 
@@ -150,7 +152,6 @@ int main(int argc, char **argv) {
   glfwSetKeyCallback(g_window, keycb);
 
   auto t_prev = high_resolution_clock::now();
-  glfwMakeContextCurrent(g_window);
 
   while (!glfwWindowShouldClose(g_window)) {
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
