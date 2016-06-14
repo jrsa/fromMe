@@ -164,14 +164,14 @@ int main(int argc, char **argv) {
     t_prev = t_now;
     glUniform1f(u_time, time);
 
-    double mouseX, mouseY; int h, w = 0;
-    glfwGetCursorPos(g_window, &mouseX, &mouseY);
-    glfwGetWindowSize(g_window, &w, &h);
-
-    float mousePosX = mouseX / w;
-    float mousePosY = mouseY / h;
-
-    glUniform2f(u_mouse_pos, mousePosX, mousePosY);
+//    double mouseX, mouseY; int h, w = 0;
+//    glfwGetCursorPos(g_window, &mouseX, &mouseY);
+//    glfwGetWindowSize(g_window, &w, &h);
+//
+//    float mousePosX = mouseX / w;
+//    float mousePosY = mouseY / h;
+//
+//    glUniform2f(u_mouse_pos, mousePosX, mousePosY);
 
     if (kinect_isgood) {
       glTexImage2D(GL_TEXTURE_2D, 0, (GLint) GL_R16UI, 640, 480, 0, GL_RED_INTEGER, GL_UNSIGNED_SHORT, k.get_depthmap_pointer());
