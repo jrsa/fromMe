@@ -9,14 +9,14 @@
 #include <glm/glm.hpp>
 
 struct vert {
-    glm::vec2 position;
-    glm::vec2 velocity;
-    glm::vec2 originalPos;
+  glm::vec2 position;
+  glm::vec2 velocity;
+  glm::vec2 originalPos;
 };
 
 struct fb_vert {
-    glm::vec2 outPosition;
-    glm::vec2 outVelocity;
+  glm::vec2 outPosition;
+  glm::vec2 outVelocity;
 };
 
-#endif //PROJECT_VERTEX_FORMAT_H
+#endif // PROJECT_VERTEX_FORMAT_H

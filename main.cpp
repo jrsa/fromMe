@@ -20,23 +20,23 @@ using namespace gl;
 using namespace std::chrono;
 using namespace simple_file;
 
-
 std::string f_fn, v_fn;
-GLFWwindow *g_window; shader *s; kinect k; bool seed = false;
+GLFWwindow *g_window;
+shader *s;
+kinect k;
+bool seed = false;
 
-void keycb(GLFWwindow* window, int key, int , int , int ) {
-  switch(key) {
-    case 'R': {
-      LOG(INFO) << "reloading shader";
-      s = new shader(read(v_fn).c_str(), read(f_fn).c_str());
-      break;
-    }
-    case 'P': {
-      seed = true;
-    }
-    default: {
-      break;
-    }
+void keycb(GLFWwindow *window, int key, int, int, int) {
+  switch (key) {
+  case 'R': {
+    LOG(INFO) << "reloading shader";
+    s = new shader(read(v_fn).c_str(), read(f_fn).c_str());
+    break;
+  }
+  case 'P': {
+    seed = true;
+  }
+  default: { break; }
   }
 }
 
@@ -55,12 +55,9 @@ int main(int argc, char **argv) {
     memset(depths, 0, depthsize);
 
     kinect_isgood = true;
-  }
-  catch (...)  {
+  } catch (...) {
     LOG(ERROR) << "running with no kinect";
   }
-
-
 
   if (!glfwInit()) {
     LOG(FATAL) << "failed to initialize glfw";
@@ -78,11 +75,13 @@ int main(int argc, char **argv) {
 
   glbinding::Binding::initialize(false);
 
-  glbinding::setCallbackMaskExcept(glbinding::CallbackMask::After, { "glGetError" });
+  glbinding::setCallbackMaskExcept(glbinding::CallbackMask::After,
+                                   {"glGetError"});
   glbinding::setAfterCallback([](const glbinding::FunctionCall &call) {
-      const auto error = glGetError();
-      if (error != GL_NO_ERROR)
-        LOG(ERROR) << "error in " << call.function->name() << ": " << std::hex << error << std::endl;
+    const auto error = glGetError();
+    if (error != GL_NO_ERROR)
+      LOG(ERROR) << "error in " << call.function->name() << ": " << std::hex
+                 << error << std::endl;
   });
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   glEnable(GL_BLEND);
@@ -114,9 +113,10 @@ int main(int argc, char **argv) {
 
   for (int y = 0; y < field_width; y++) {
     for (int x = 0; x < field_width; x++) {
-      glm::vec2 position = { (1.5 / field_width) * x - 0.7f, (1.5 / field_width) * y - 0.7f };
-      point_data[field_width * y + x] = { position, { 0.0, 0.0 }, position };
-      orig_points[field_width * y + x] = { position, { 0.0, 0.0 }, position };
+      glm::vec2 position = {(1.5 / field_width) * x - 0.7f,
+                            (1.5 / field_width) * y - 0.7f};
+      point_data[field_width * y + x] = {position, {0.0, 0.0}, position};
+      orig_points[field_width * y + x] = {position, {0.0, 0.0}, position};
     }
   }
 
@@ -124,24 +124,29 @@ int main(int argc, char **argv) {
   glGenBuffers(1, &xform_in_buf);
   glBindBuffer(GL_ARRAY_BUFFER, xform_in_buf);
 
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vert) * field_area, point_data, GL_STREAM_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, sizeof(vert) * field_area, point_data,
+               GL_STREAM_DRAW);
 
   GLint a_position = glGetAttribLocation(s->program(), "position");
   glEnableVertexAttribArray(a_position);
-  glVertexAttribPointer(a_position, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
+  glVertexAttribPointer(a_position, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat),
+                        0);
 
   GLint a_velocity = glGetAttribLocation(s->program(), "velocity");
   glEnableVertexAttribArray(a_velocity);
-  glVertexAttribPointer(a_velocity, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void *) sizeof(glm::vec2));
+  glVertexAttribPointer(a_velocity, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat),
+                        (void *)sizeof(glm::vec2));
 
   GLint a_original_pos = glGetAttribLocation(s->program(), "originalPos");
   glEnableVertexAttribArray(a_original_pos);
-  glVertexAttribPointer(a_original_pos, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (void *) (sizeof(glm::vec2) * 2));
+  glVertexAttribPointer(a_original_pos, 2, GL_FLOAT, GL_FALSE,
+                        6 * sizeof(GLfloat), (void *)(sizeof(glm::vec2) * 2));
 
   GLuint xform_out_buf;
   glGenBuffers(1, &xform_out_buf);
   glBindBuffer(GL_ARRAY_BUFFER, xform_out_buf);
-  glBufferData(GL_ARRAY_BUFFER, field_area * sizeof(fb_vert), nullptr, GL_STATIC_READ);
+  glBufferData(GL_ARRAY_BUFFER, field_area * sizeof(fb_vert), nullptr,
+               GL_STATIC_READ);
 
   glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, xform_out_buf);
   fb_vert *feedback_buffer = new fb_vert[field_area];
@@ -164,34 +169,28 @@ int main(int argc, char **argv) {
     t_prev = t_now;
     glUniform1f(u_time, time);
 
-//    double mouseX, mouseY; int h, w = 0;
-//    glfwGetCursorPos(g_window, &mouseX, &mouseY);
-//    glfwGetWindowSize(g_window, &w, &h);
-//
-//    float mousePosX = mouseX / w;
-//    float mousePosY = mouseY / h;
-//
-//    glUniform2f(u_mouse_pos, mousePosX, mousePosY);
-
     if (kinect_isgood) {
-      glTexImage2D(GL_TEXTURE_2D, 0, (GLint) GL_R16UI, 640, 480, 0, GL_RED_INTEGER, GL_UNSIGNED_SHORT, k.get_depthmap_pointer());
+      glTexImage2D(GL_TEXTURE_2D, 0, (GLint)GL_R16UI, 640, 480, 0,
+                   GL_RED_INTEGER, GL_UNSIGNED_SHORT, k.get_depthmap_pointer());
     }
 
     glUniform1i(u_depth, 0);
 
-    if(seed) {
-      glBufferData(GL_ARRAY_BUFFER, sizeof(vert) * field_area, orig_points, GL_STREAM_DRAW);
+    if (seed) {
+      glBufferData(GL_ARRAY_BUFFER, sizeof(vert) * field_area, orig_points,
+                   GL_STREAM_DRAW);
       seed = false;
     }
 
     glBeginTransformFeedback(GL_POINTS);
-      glDrawArrays(GL_POINTS, 0, field_area);
+    glDrawArrays(GL_POINTS, 0, field_area);
     glEndTransformFeedback();
 
     glfwSwapBuffers(g_window);
 
     // feed vertex output back into input
-    glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, sizeof(fb_vert) * field_area, feedback_buffer);
+    glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0,
+                       sizeof(fb_vert) * field_area, feedback_buffer);
     for (int i = 0; i < field_area; i++) {
       point_data[i].position = feedback_buffer[i].outPosition;
       point_data[i].velocity = feedback_buffer[i].outVelocity;
